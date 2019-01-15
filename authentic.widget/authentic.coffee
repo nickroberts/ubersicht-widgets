@@ -3,6 +3,9 @@
 
 # ------------------------------ CONFIG ------------------------------
 
+# locale
+locale: 'en-US'
+
 # forecast.io api key
 apiKey: '14666b202d721c2dfbaa8aa4854ba3fb'
 
@@ -17,6 +20,9 @@ showIcon: true
 
 # temperature above text; true or false
 showTemp: true
+
+# show forecast
+showForecast: true
 
 # refresh every '(60 * 1000)  * x' minutes
 refreshFrequency: (60 * 1000) * 10
@@ -44,6 +50,10 @@ render: (o) -> """
 		<!-- subline text box -->
 		<h2>
 		</h2>
+
+		<!-- forecast -->
+		<div id="forecast">
+		</div>
 	</article>
 """
 
@@ -58,6 +68,8 @@ afterRender: (domEl) ->
 update: (o, dom) ->
 	# parse command json
 	data = JSON.parse(o)
+
+	console.log(data)
 
 	return unless data.currently?
 	# get current temp from json
@@ -77,11 +89,19 @@ update: (o, dom) ->
 
 	if @showTemp
 		if @unit == 'f'
-			snippetContent.push "#{ Math.round(t * 9 / 5 + 32) } °F"
+			snippetContent.push "#{ Math.round(t * 9 / 5 + 32) }&deg; F"
 		else
-			snippetContent.push "#{ Math.round(t) } °C"
+			snippetContent.push "#{ Math.round(t) }&deg; C"
 
 	$(dom).find('#snippet').html snippetContent.join ''
+
+	if @showForecast and data.daily and data.daily.data and data.daily.data.length
+		forecastData = $('<div class="forecast-data" />')
+		forecastContent = []
+		for i in [0...5]
+			forecastContent.push @getDay data.daily.data[i]
+		forecastData.html forecastContent.join ''
+		$(dom).find('#forecast').html forecastData
 
 	# process condition data (2/2)
 	s1 = s1.replace(/(day)/g, "")
@@ -91,6 +111,30 @@ update: (o, dom) ->
 
 	# get relevant phrase
 	@parseStatus(s1, t, dom)
+
+getDay: (day) ->
+	d = new Date
+	d.setTime(day.time * 1000)
+	dayName = d.toLocaleDateString(@locale, { weekday: 'long' })
+	s1 = day.icon
+	s1 = s1.replace(/-/g, "_")
+	if @unit == 'f'
+		temperatureHigh = "#{ Math.round(day.temperatureHigh * 9 / 5 + 32) }&deg; F"
+		temperatureLow = "#{ Math.round(day.temperatureLow * 9 / 5 + 32) }&deg; F"
+	else
+		temperatureHigh = "#{ Math.round(day.temperatureHigh) }&deg; C"
+		temperatureLow = "#{ Math.round(day.temperatureLow) }&deg; C"
+	return """
+		<div class='day'>
+			<div>#{ dayName }</div>
+			<div class='icon'>
+				<img src='authentic.widget/icon/#{ @icon }/#{ s1 }.png'></img>
+			</div>
+			<div>
+				<span class='high'>#{ temperatureHigh }</span> / <span class='low'>#{ temperatureLow }</span>
+			</div>
+		</div>
+	"""
 
 # phrases dump from android app
 parseStatus: (summary, temperature, dom) ->
@@ -193,4 +237,33 @@ style: """
 
 	i
 		font-style normal
+
+	#forecast
+		.forecast-data
+			margin-top: 20px
+			display: flex
+			flex-flow: row nowrap
+			justify-content: space-around
+			align-items: center
+
+			.day
+				display: flex
+				flex: 1
+				flex-flow: column nowrap
+				justify-content: flex-start
+				align-items: center
+				font-size: 12px
+				.icon
+					display: flex
+					flex: 1
+					justify-content: center
+					align-items: center
+					margin: 5px 0
+					height: 48px
+					width: 48px
+					img
+						max-height: 100%
+						max-width: 100%
+				.low
+				  color: #ccc
 """
