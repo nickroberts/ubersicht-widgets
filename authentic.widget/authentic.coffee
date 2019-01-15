@@ -69,8 +69,6 @@ update: (o, dom) ->
 	# parse command json
 	data = JSON.parse(o)
 
-	console.log(data)
-
 	return unless data.currently?
 	# get current temp from json
 	t = data.currently.temperature
