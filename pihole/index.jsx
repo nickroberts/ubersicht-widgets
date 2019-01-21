@@ -7,7 +7,7 @@ export const refreshFrequency = 60 * 1000 * 10;
 export const className = css`
   right: 10px;
   width: 450px;
-  top: 430px;
+  bottom: 415px;
 `;
 
 const Container = styled('div')`

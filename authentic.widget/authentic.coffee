@@ -203,7 +203,7 @@ parseStatus: (summary, temperature, dom) ->
 style: """
 	width 448px
 	right 10px
-	top 80px
+	top 10px
 	font-family 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, 'Open Sans', sans-serif
 	font-smooth always
 	color #ffffff
@@ -214,8 +214,13 @@ style: """
 		border-radius: 5px
 
 	#snippet
-		font-size 2em
-		font-weight 500
+		font-size: 2em
+		font-weight: 500
+		display: flex
+		flex-flow: row nowrap
+		justify-content: flex-start
+		align-items: center
+
 
 		img
 			max-width 100px
